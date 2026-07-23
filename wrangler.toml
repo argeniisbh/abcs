@@ -1,0 +1,8 @@
+name = "cs-apartmentbarcelona"
+type = "javascript"
+compatibility_date = "2024-01-01"
+
+[env.production]
+name = "cs-apartmentbarcelona"
+route = "cs-apartmentbarcelona.pages.dev/*"
+zone_id = ""
