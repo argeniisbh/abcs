@@ -1,8 +1,27 @@
+export async function onRequestGet(context) {
+  const apiKey = context.env.ANTHROPIC_API_KEY || "";
+  const length = apiKey.length;
+  const startsWithSk = apiKey.startsWith("sk-");
+  const hasSpaces = apiKey.includes(" ");
+  const hasNewlines = apiKey.includes("\n") || apiKey.includes("\r");
+  
+  return resp({
+    keyExists: length > 0,
+    keyLength: length,
+    startsWithSk: startsWithSk,
+    hasSpaces: hasSpaces,
+    hasNewlines: hasNewlines,
+    diagnosis: !startsWithSk ? "❌ Key no comienza con 'sk-'" : 
+               hasSpaces || hasNewlines ? "❌ Key contiene espacios o saltos de línea" :
+               length < 20 ? "❌ Key demasiado corta" :
+               "✅ Key parece estar bien"
+  }, 200);
+}
+
 export async function onRequestPost(context) {
   const { request, env } = context;
 
   try {
-    // Parsear el body
     let prompt = "Hola";
     try {
       const body = await request.json();
@@ -13,19 +32,11 @@ export async function onRequestPost(context) {
       return resp({ error: "Error parseando JSON" }, 400);
     }
 
-    // Obtener y limpiar la key
-    let apiKey = env.ANTHROPIC_API_KEY || "";
-    if (!apiKey) {
-      return resp({ error: "No existe ANTHROPIC_API_KEY" }, 500);
-    }
-    
-    // Limpiar espacios, saltos de línea y caracteres invisibles
-    apiKey = String(apiKey).trim();
-    if (apiKey.includes(" ") || apiKey.includes("\n") || apiKey.includes("\r")) {
-      return resp({ error: "ANTHROPIC_API_KEY contiene espacios o saltos de línea" }, 500);
+    const apiKey = (env.ANTHROPIC_API_KEY || "").trim();
+    if (!apiKey || !apiKey.startsWith("sk-")) {
+      return resp({ error: "API key inválida o no existe" }, 500);
     }
 
-    // Llamar a Anthropic
     const apiResponse = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -40,17 +51,14 @@ export async function onRequestPost(context) {
       })
     });
 
-    // Parsear respuesta
     const data = await apiResponse.json();
 
-    // Verificar si Anthropic devolvió error
     if (!apiResponse.ok) {
       return resp({
-        error: "Anthropic: " + (data.error?.message || `Status ${apiResponse.status}`),
+        error: "Anthropic error: " + (data.error?.message || `Status ${apiResponse.status}`),
       }, apiResponse.status);
     }
 
-    // Extraer texto
     const text = data?.content?.[0]?.text || "Sin respuesta";
     return resp({ texto: text }, 200);
 
