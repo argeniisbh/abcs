@@ -3,27 +3,27 @@ export async function onRequestPost(context) {
 
   try {
     const body = await request.json();
-    const { tipo, seccion, datos, pregunta } = body;
+    const { tipo, seccion, datos, pregunta, prompt } = body;
 
     // Modo 1: Resumen automático de sección
     if (tipo === "resumen-seccion") {
-      const prompt = generarPromptSeccion(seccion, datos);
-      return await llamarIA(env, prompt);
+      const promptGenerado = generarPromptSeccion(seccion, datos);
+      return await llamarIA(env, promptGenerado);
     }
 
     // Modo 2: Chat contextual dentro de sección
     if (tipo === "chat-contextual") {
-      const prompt = generarPromptChat(seccion, datos, pregunta);
-      return await llamarIA(env, prompt);
+      const promptGenerado = generarPromptChat(seccion, datos, pregunta);
+      return await llamarIA(env, promptGenerado);
     }
 
     // Modo 3: Consulta general (como antes)
     if (tipo === "consulta-general") {
-      const prompt = body.prompt || "Hola";
-      return await llamarIA(env, prompt);
+      const promptReal = prompt || pregunta || "Hola";
+      return await llamarIA(env, promptReal);
     }
 
-    return respuesta({ error: "Tipo de solicitud no válido" }, 400);
+    return respuesta({ error: "Tipo de solicitud no válido: " + tipo }, 400);
 
   } catch (e) {
     return respuesta({ error: "Error: " + String(e.message) }, 500);
