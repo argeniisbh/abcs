@@ -3017,66 +3017,16 @@ async function probarIA(){
   const salida=document.getElementById('resultadoIA');
   const btn=document.getElementById('btnProbarIA');
   salida.style.display='block';
-  salida.textContent='Recopilando datos del turno…';
+  salida.textContent='Consultando IA…';
   btn.disabled=true;
   
   try{
-    // Recopilar datos de hoy
-    const hoy=new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-    
-    const checkins=DB.get('ab_checkins',[]);
-    const checkouts=DB.get('ab_checkouts',[]);
-    const keys=DB.get('ab_keys',[]);
-    const noise=DB.get('ab_noise',[]);
-    const reports=DB.get('ab_reports',[]);
-    const activity=DB.get('ab_activity',[]);
-    
-    // Contar check-ins de hoy
-    const checkinsHoy=checkins.filter(c=>String(c.fecha||'').startsWith(hoy));
-    const checkinsAbiertos=checkinsHoy.filter(c=>!c.completado && !c.noshow).length;
-    
-    // Contar checkouts de hoy
-    const checkoutsHoy=checkouts.filter(c=>String(c.fecha||'').startsWith(hoy));
-    const checkoutsSinConfirmar=checkoutsHoy.filter(c=>!c.completado).length;
-    
-    // Llaves
-    const llavesEntregadas=checkins.filter(c=>c.completado && c.llavesEntregadas).length;
-    const llavesPendientes=checkouts.filter(c=>!c.completado && c.numLlaves&&c.numLlaves>0).length;
-    
-    // Ruido de hoy
-    const ruidoHoy=noise.filter(n=>String(n.fecha||n.time||'').includes(hoy));
-    const ruidoPendiente=ruidoHoy.filter(n=>n.estado!=='resuelto'&&n.estado!=='closed').length;
-    
-    // Reportes pendientes
-    const reportesPendientes=reports.filter(r=>r.estado==='pendiente'||r.estado==='open').length;
-    
-    // Últimas acciones (últimas 3 del activity log)
-    const ultimasAcciones=activity
-      .sort((a,b)=>(b.ts||0)-(a.ts||0))
-      .slice(0,3)
-      .map(a=>a.action||'acción')
-      .filter(a=>a.length>0);
-    
-    salida.textContent='Generando resumen…';
-    
-    // Llamar a la IA con los datos estructurados
     const r=await fetch('/api/ia',{
       method:'POST',
       headers:{'content-type':'application/json'},
       body:JSON.stringify({
-        tipo:'resumen-turno',
-        datos:{
-          checkinsTotal:checkinsHoy.length,
-          checkinsAbiertos:checkinsAbiertos,
-          checkoutsTotal:checkoutsHoy.length,
-          checkoutsSinConfirmar:checkoutsSinConfirmar,
-          llavesEntregadas:llavesEntregadas,
-          llavesPendientes:llavesPendientes,
-          ruidoTotal:ruidoHoy.length,
-          ruidoPendiente:ruidoPendiente,
-          reportesPendientes:reportesPendientes,
-          ultimasAcciones:ultimasAcciones
-        }
+        tipo:'consulta-general',
+        prompt:'¿Estás funcionando correctamente?'
       })
     });
     
