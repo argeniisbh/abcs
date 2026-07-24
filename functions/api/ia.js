@@ -1,42 +1,36 @@
-export async function onRequestGet(context) {
-  const apiKey = context.env.ANTHROPIC_API_KEY || "";
-  const length = apiKey.length;
-  const startsWithSk = apiKey.startsWith("sk-");
-  const hasSpaces = apiKey.includes(" ");
-  const hasNewlines = apiKey.includes("\n") || apiKey.includes("\r");
-  
-  return resp({
-    keyExists: length > 0,
-    keyLength: length,
-    startsWithSk: startsWithSk,
-    hasSpaces: hasSpaces,
-    hasNewlines: hasNewlines,
-    diagnosis: !startsWithSk ? "❌ Key no comienza con 'sk-'" : 
-               hasSpaces || hasNewlines ? "❌ Key contiene espacios o saltos de línea" :
-               length < 20 ? "❌ Key demasiado corta" :
-               "✅ Key parece estar bien"
-  }, 200);
-}
-
 export async function onRequestPost(context) {
   const { request, env } = context;
 
   try {
-    let prompt = "Hola";
+    let body = {};
     try {
-      const body = await request.json();
-      if (body && body.prompt) {
-        prompt = String(body.prompt).slice(0, 5000);
-      }
+      body = await request.json();
     } catch (e) {
-      return resp({ error: "Error parseando JSON" }, 400);
+      // Si no viene JSON, es un prompt simple
     }
 
-    const apiKey = (env.ANTHROPIC_API_KEY || "").trim();
-    if (!apiKey || !apiKey.startsWith("sk-")) {
-      return resp({ error: "API key inválida o no existe" }, 500);
+    // Si viene con datos estructurados (resumen de turno), úsalos
+    if (body.tipo === "resumen-turno") {
+      const prompt = generarPromptResumen(body.datos);
+      return await llamarIA(env, prompt);
     }
 
+    // Si no, es un prompt simple
+    const prompt = body.prompt || "Hola";
+    return await llamarIA(env, prompt);
+
+  } catch (e) {
+    return resp({ error: "Error: " + String(e.message) }, 500);
+  }
+}
+
+async function llamarIA(env, prompt) {
+  const apiKey = (env.ANTHROPIC_API_KEY || "").trim();
+  if (!apiKey || !apiKey.startsWith("sk-")) {
+    return resp({ error: "API key inválida" }, 500);
+  }
+
+  try {
     const apiResponse = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -55,7 +49,7 @@ export async function onRequestPost(context) {
 
     if (!apiResponse.ok) {
       return resp({
-        error: "Anthropic error: " + (data.error?.message || `Status ${apiResponse.status}`),
+        error: "Anthropic: " + (data.error?.message || `Status ${apiResponse.status}`),
       }, apiResponse.status);
     }
 
@@ -63,8 +57,22 @@ export async function onRequestPost(context) {
     return resp({ texto: text }, 200);
 
   } catch (e) {
-    return resp({ error: "Error: " + String(e.message) }, 500);
+    return resp({ error: "Error en fetch: " + String(e.message) }, 500);
   }
+}
+
+function generarPromptResumen(datos) {
+  return `Eres un asistente para el equipo de gestión de apartamentos en Barcelona. Genera un resumen de traspaso de turno en español, breve y directo.
+
+Datos del turno de hoy:
+- Check-ins: ${datos.checkinsTotal} total, ${datos.checkinsAbiertos} sin cerrar
+- Checkouts: ${datos.checkoutsTotal} total, ${datos.checkoutsSinConfirmar} sin confirmar
+- Llaves: ${datos.llavesEntregadas} entregadas, ${datos.llavesPendientes} pendientes de devolver
+- Ruido: ${datos.ruidoTotal} incidencias reportadas${datos.ruidoPendiente ? ` (${datos.ruidoPendiente} pendientes)` : ''}
+- Reportes: ${datos.reportesPendientes} reportes pendientes
+- Actividad: Últimas acciones: ${datos.ultimasAcciones.join(', ')}
+
+Redacta un resumen conciso para pasar al siguiente turno. Formato: 2-3 frases máximo. Menciona solo lo que es crítico o pendiente.`;
 }
 
 function resp(obj, status) {
