@@ -3008,11 +3008,18 @@ document.getElementById('av-hasta').value=todayStr();
 async function probarIA(){
   const salida=document.getElementById('resultadoIA');
   const btn=document.getElementById('btnProbarIA');
+  
+  if (!salida || !btn) {
+    console.error('Elementos no encontrados');
+    return;
+  }
+  
   salida.style.display='block';
   salida.textContent='Consultando IA…';
   btn.disabled=true;
   
   try{
+    console.log('Iniciando petición a /api/ia...');
     const r=await fetch('/api/ia',{
       method:'POST',
       headers:{'content-type':'application/json'},
@@ -3022,9 +3029,24 @@ async function probarIA(){
       })
     });
     
+    console.log('Respuesta recibida:', r.status);
+    
+    if (!r.ok) {
+      throw new Error(`HTTP ${r.status}: ${r.statusText}`);
+    }
+    
     const datos=await r.json();
-    salida.textContent=datos.texto||('Error: '+(datos.error||'respuesta vacía'));
+    console.log('Datos parseados:', datos);
+    
+    if (datos.error) {
+      salida.textContent='Error: '+datos.error;
+    } else if (datos.texto) {
+      salida.textContent=datos.texto;
+    } else {
+      salida.textContent='Sin respuesta';
+    }
   }catch(e){
+    console.error('Error en probarIA:', e);
     salida.textContent='Error: '+e.message;
   }finally{
     btn.disabled=false;
