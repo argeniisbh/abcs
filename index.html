@@ -77,20 +77,6 @@
 [data-theme="light"] .noise-lvl-badge.nv1{background:#fdeec8;color:#8a5a00;}
 [data-theme="light"] .noise-lvl-badge.nv2{background:#fde4d0;color:#a85a00;}
 [data-theme="light"] .noise-lvl-badge.nv3{background:#fde4e4;color:#b81f2e;}
-
-/* Estilos para resúmenes automáticos de IA */
-.resumen-ia-container{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--r);padding:12px 14px;margin-top:10px;font-size:13px;line-height:1.5;color:var(--tx);max-height:0;overflow:hidden;opacity:0;transition:all .3s ease;}
-.resumen-ia-container.activo{max-height:400px;opacity:1;}
-.resumen-ia-header{display:flex;align-items:center;gap:8px;font-weight:600;color:var(--ac);margin-bottom:8px;cursor:pointer;}
-.resumen-ia-texto{color:var(--tx);margin-bottom:10px;padding:8px 0;border-bottom:1px solid var(--bd);}
-.resumen-ia-chat{display:flex;gap:6px;margin-top:8px;}
-.resumen-ia-chat input{flex:1;padding:6px 10px;border:1px solid var(--bd);border-radius:6px;background:var(--sf);color:var(--tx);font-size:12px;}
-.resumen-ia-chat input::placeholder{color:var(--tx3);}
-.resumen-ia-chat button{padding:6px 12px;background:var(--ac);color:white;border:none;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;transition:background .2s;}
-.resumen-ia-chat button:hover{background:var(--ac2);}
-.resumen-ia-cargando{color:var(--tx2);font-style:italic;animation:pulse 1.5s infinite;}
-@keyframes pulse{0%,100%{opacity:.6;}50%{opacity:1;}}
-.resumen-ia-error{color:var(--rd);font-size:12px;}
 .noise-guest-info{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--tx2);}
 .noise-desc{font-size:13px;color:var(--tx);line-height:1.5;background:var(--sf2);border-radius:8px;padding:8px 11px;}
 .noise-img{width:100%;max-height:320px;border-radius:8px;border:1px solid var(--bd);cursor:pointer;object-fit:contain;background:var(--sf2);}
@@ -503,7 +489,7 @@ tr.rc-ns{background:#1a0505 !important;}
 </div>
 </div>
 </div>
-
+</div>
 
 
 <!-- CHECKOUT -->
@@ -553,7 +539,7 @@ tr.rc-ns{background:#1a0505 !important;}
 </div>
 </div>
 </div>
-
+</div>
 
 <!-- HISTORIAL -->
 <div id="sec-history" class="section">
@@ -571,7 +557,6 @@ tr.rc-ns{background:#1a0505 !important;}
 <div id="histHdr" style="margin-bottom:10px;display:none"><div style="font-size:14px;font-weight:600" id="histHdrTxt"></div></div>
 <div id="histList"></div>
 </div>
-
 
 <!-- KEYS -->
 <div id="sec-keys" class="section">
@@ -619,7 +604,6 @@ tr.rc-ns{background:#1a0505 !important;}
 </div>
 </div>
 </div>
-
 
 <!-- AVISOS RUIDO -->
 <div id="sec-noise" class="section">
@@ -723,7 +707,6 @@ tr.rc-ns{background:#1a0505 !important;}
 <div id="repHdr" style="margin-bottom:10px;display:none"><div style="font-size:14px;font-weight:600" id="repHdrTxt"></div></div>
 <div id="repList"></div>
 </div>
-
 
 <!-- ACTIVITY -->
 <div id="sec-activity" class="section">
@@ -1828,8 +1811,6 @@ const tb=document.getElementById('ciBody');
 if(!fil.length){
 tb.innerHTML=`<tr><td colspan="10"><div class="empty"><div class="ei">📋</div><h3>${all.length?'Sin resultados':'Sin llegadas cargadas'}</h3><p>${all.length?'Cambia los filtros':'Carga el Excel o añade una llegada'}</p></div></td></tr>`;
 return;
-
-
 }
 tb.innerHTML=fil.map(c=>{
 // Use tipoNorm (simple ASCII) if stored, else compute from tipoLlave
@@ -2106,7 +2087,6 @@ if(!auto){
     tabs.forEach(t=>{ if(t.textContent.trim().includes('Historial')){ goSec('history',t); } });
   }, 100);
 }
-
 }
 
 // HISTORY
@@ -2131,9 +2111,7 @@ document.getElementById('histMGrid').innerHTML=MONTHS.map((m,i)=>{
   return`<button class="mbtn ${histMonth===i&&histYear===yr?'active':''}" onclick="selHistMon(${i},this)">${m}<span class="mbs">${cnt?cnt+(pen?` ⚠️`:' ✓'):'—'}</span></button>`;
 }).join('');
 renderHistDayStrip();renderHistList();
-
 }
-
 function selHistMon(m,el){histMonth=m;histDay=null;document.querySelectorAll('#histMGrid .mbtn').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderHistDayStrip();renderHistList();}
 function renderHistDayStrip(){
 const hist=DB.get('ab_history',[]);
@@ -2248,8 +2226,6 @@ ${isAdmin?`<button class="btn btn-r btn-sm" onclick="deleteKey('${k.id}')" title
 <div class="khist" id="kh-${k.id}">
 ${k.historial.length?`<div style="font-size:10px;color:var(--tx3);margin-bottom:6px;text-transform:uppercase">Historial</div>`+k.historial.slice().reverse().map(h=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd);font-size:12px;flex-wrap:wrap"><span style="color:${h.tipo==='entrega'?'var(--rd)':'var(--gn)'}">${h.tipo==='entrega'?'📤':'📥'} ${h.tipo==='entrega'?'Entregada':'Devuelta'}</span>${ach(h.agente)}${h.reserva?`<span style="color:var(--tx3)">#${h.reserva}</span>`:''}<span style="color:var(--tx3)">${h.cantidad} llave${h.cantidad>1?'s':''}</span>${h.notas?`<span style="color:var(--tx3)">"${h.notas}"</span>`:''}<span style="margin-left:auto;color:var(--tx3)">${h.hora}</span></div>`).join(''):`<div style="color:var(--tx3);font-size:12px">Sin movimientos registrados</div>`}
 </div>`}).join(''):'<div class="empty"><div class="ei">🗝️</div><h3>Sin resultados</h3><p>No hay llaves que coincidan con tu búsqueda</p></div>';
-
-
 }
 function togKH(id){const el=document.getElementById('kh-'+id);el.style.display=el.style.display==='block'?'none':'block';}
 function openKA(kid,type){
@@ -2575,8 +2551,6 @@ ${links?`<div class="noise-links">${links}</div>`:''}
 </div>
 </div>`;
   }).join('');
-
-
 }
 const noiseOpenCards=new Set();
 function toggleNoiseCard(id){
@@ -2615,8 +2589,6 @@ const pen=rp.filter(r=>{const d=new Date(r.fecha||r.desde||'');return d.getFullY
 return`<button class="mbtn ${repMonth===i&&repYear===yr?'active':''}" onclick="selMon(${i},this)">${m}<span class="mbs">${cnt?cnt+(pen?` ⚠️`:' ✓'):'—'}</span></button>`;
 }).join('');
 renderDayStrip();renderRepList();
-
-
 }
 function selMon(m,el){repMonth=m;repDay=null;document.querySelectorAll('.mbtn').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderDayStrip();renderRepList();}
 function renderDayStrip(){
@@ -2947,8 +2919,6 @@ function renderCO(){
       +'<td><button class="sbtn '+(co.completado?'sd':'sp')+'" onclick="togCO('+co.id+')">'+(co.completado?'✓ Checkout OK':'Pendiente')+'</button></td>'
       +'</tr>';
   }).join('');
-
-
 }
 
 function togCO(id){
@@ -2991,154 +2961,44 @@ document.getElementById('av-fec').value=todayStr();
 document.getElementById('av-hasta').value=todayStr();
 </script>
 
-<!-- ===== BOTÓN DE PRUEBA IA (temporal · se puede quitar cuando funcione) ===== -->
-<button id="btnProbarIA" onclick="probarIA()"
-  style="position:fixed;bottom:20px;right:20px;z-index:99999;padding:12px 18px;
-         background:#5b6ef5;color:#fff;border:none;border-radius:10px;
-         font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;
-         cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.4)">
-  🤖 Probar IA
-</button>
-<div id="resultadoIA"
-  style="position:fixed;bottom:72px;right:20px;z-index:99999;max-width:400px;max-height:500px;
-         padding:14px 16px;background:#1e2235;color:#e8eaf6;border:1px solid #363c5e;
-         border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;
-         line-height:1.6;white-space:pre-wrap;display:none;box-shadow:0 4px 16px rgba(0,0,0,.4);
-         overflow-y:auto;word-wrap:break-word;"></div>
+<!-- BOTÓN RESUMEN IA -->
+<button id="btnResumenIA" onclick="generarResumenDia()" style="position:fixed;bottom:20px;right:20px;z-index:99999;padding:12px 16px;background:#5b6ef5;color:white;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,.4)">📝 Resumen IA</button>
+<div id="resumenIABox" style="position:fixed;bottom:75px;right:20px;z-index:99998;max-width:350px;max-height:350px;padding:14px;background:#1e2235;color:#e8eaf6;border:1px solid #363c5e;border-radius:10px;font-size:12px;line-height:1.5;display:none;overflow-y:auto;box-shadow:0 4px 12px rgba(0,0,0,.4)"></div>
+
 <script>
-async function probarIA(){
-  const salida=document.getElementById('resultadoIA');
-  const btn=document.getElementById('btnProbarIA');
+async function generarResumenDia() {
+  const btn = document.getElementById('btnResumenIA');
+  const caja = document.getElementById('resumenIABox');
   
-  if (!salida || !btn) {
-    console.error('Elementos no encontrados');
-    return;
-  }
-  
-  salida.style.display='block';
-  salida.textContent='Consultando IA…';
-  btn.disabled=true;
-  
-  try{
-    console.log('Iniciando petición a /api/ia...');
-    const r=await fetch('/api/ia',{
-      method:'POST',
-      headers:{'content-type':'application/json'},
-      body:JSON.stringify({
-        tipo:'consulta-general',
-        prompt:'¿Estás funcionando correctamente?'
-      })
-    });
-    
-    console.log('Respuesta recibida:', r.status);
-    
-    if (!r.ok) {
-      throw new Error(`HTTP ${r.status}: ${r.statusText}`);
-    }
-    
-    const datos=await r.json();
-    console.log('Datos parseados:', datos);
-    
-    if (datos.error) {
-      salida.textContent='Error: '+datos.error;
-    } else if (datos.texto) {
-      salida.textContent=datos.texto;
-    } else {
-      salida.textContent='Sin respuesta';
-    }
-  }catch(e){
-    console.error('Error en probarIA:', e);
-    salida.textContent='Error: '+e.message;
-  }finally{
-    btn.disabled=false;
-  }
-}
-
-// ===== FUNCIONES PARA RESÚMENES POR SECCIÓN =====
-async function generarResumenSeccion(seccion, datos) {
-  const container = document.getElementById(`resumenIA-${seccion}`);
-  const contenido = document.getElementById(`resumenIA-${seccion}-contenido`);
-  
-  if (!container) return;
+  btn.disabled = true;
+  caja.style.display = 'block';
+  caja.textContent = 'Generando resumen...';
   
   try {
-    contenido.innerHTML = '<div class="resumen-ia-cargando">Analizando datos…</div>';
+    const ciAll = DB.get('ab_checkins', []);
+    const coAll = DB.get('ab_checkouts', []);
+    const repAll = DB.get('ab_reports', []);
+    
+    const resumenTexto = `Hoy se hizo:
+- ${ciAll.length} check-ins (${ciAll.filter(c => !c.completado && !c.noshow).length} abiertos)
+- ${coAll.length} checkouts (${coAll.filter(c => !c.completado).length} pendientes)
+- ${repAll.filter(r => r.estado === 'pendiente' || r.estado === 'open').length} reportes pendientes`;
     
     const r = await fetch('/api/ia', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        tipo: 'resumen-seccion',
-        seccion: seccion,
-        datos: datos
-      })
+      body: JSON.stringify({ resumen: resumenTexto })
     });
     
-    const resultado = await r.json();
-    
-    if (resultado.error) {
-      contenido.innerHTML = `<div class="resumen-ia-error">Error: ${resultado.error}</div>`;
-    } else {
-      contenido.innerHTML = resultado.texto;
-      container.classList.add('activo');
-    }
+    const datos = await r.json();
+    caja.textContent = datos.texto || 'Error: ' + (datos.error || 'sin respuesta');
   } catch (e) {
-    contenido.innerHTML = `<div class="resumen-ia-error">Error de red: ${e.message}</div>`;
-  }
-}
-
-async function enviarPreguntaResumen(seccion) {
-  const input = document.getElementById(`resumenIA-${seccion}-input`);
-  const contenido = document.getElementById(`resumenIA-${seccion}-contenido`);
-  const pregunta = input.value.trim();
-  
-  if (!pregunta) return;
-  
-  input.disabled = true;
-  const textoPrevio = contenido.innerHTML;
-  contenido.innerHTML = '<div class="resumen-ia-cargando">Procesando pregunta…</div>';
-  
-  try {
-    const r = await fetch('/api/ia', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        tipo: 'chat-contextual',
-        seccion: seccion,
-        pregunta: pregunta,
-        datos: {}
-      })
-    });
-    
-    const resultado = await r.json();
-    
-    if (resultado.error) {
-      contenido.innerHTML = `<div class="resumen-ia-error">Error: ${resultado.error}</div>`;
-    } else {
-      contenido.innerHTML = resultado.texto;
-    }
-    
-    input.value = '';
-  } catch (e) {
-    contenido.innerHTML = textoPrevio;
-    alert('Error: ' + e.message);
+    caja.textContent = 'Error: ' + e.message;
   } finally {
-    input.disabled = false;
+    btn.disabled = false;
   }
 }
-
-// Hacer headers clickeables para expandir/contraer
-document.addEventListener('DOMContentLoaded', function() {
-  const headers = document.querySelectorAll('.resumen-ia-header');
-  headers.forEach(header => {
-    header.addEventListener('click', function() {
-      const container = this.closest('.resumen-ia-container');
-      if (container) container.classList.toggle('activo');
-    });
-  });
-});
 </script>
-<!-- ===== FIN BOTÓN DE PRUEBA IA ===== -->
 
 </body>
 </html>
