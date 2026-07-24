@@ -3,17 +3,15 @@ export async function onRequestPost(context) {
 
   try {
     if (!env.ANTHROPIC_API_KEY) {
-      return json({ error: "No hay API key configurada" }, 500);
+      return json({ error: "No hay API key" }, 500);
     }
 
-    // Recibir el resumen básico desde el frontend
     const body = await request.json().catch(() => ({}));
-    const resumenDatos = body.resumen || "Sin datos";
+    const resumen = body.resumen || "Sin datos";
 
-    // Prompt ultra-simple
-    const prompt = `Eres un asistente para un equipo de gestión de apartamentos. Basándote en estos datos de hoy, escribe UN PÁRRAFO corto (máximo 3 líneas) diciendo qué pasó hoy:\n\n${resumenDatos}`;
+    const prompt = `Eres asistente de un equipo de gestión de apartamentos. Basándote en esto, escribe UN párrafo corto (máximo 2 líneas) describiendo qué pasó hoy:\n\n${resumen}`;
 
-    const respuesta = await fetch("https://api.anthropic.com/v1/messages", {
+    const r = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -22,22 +20,17 @@ export async function onRequestPost(context) {
       },
       body: JSON.stringify({
         model: "claude-haiku-4-5-20251001",
-        max_tokens: 256,
+        max_tokens: 200,
         messages: [{ role: "user", content: prompt }]
       })
     });
 
-    const datos = await respuesta.json();
-
-    if (!respuesta.ok) {
-      return json({ error: "Error de la IA: " + (datos.error?.message || "desconocido") }, 500);
-    }
-
+    const datos = await r.json();
     const texto = datos?.content?.[0]?.text || "Sin respuesta";
-    return json({ texto: texto }, 200);
+    return json({ texto }, 200);
 
-  } catch (error) {
-    return json({ error: error.message }, 500);
+  } catch (e) {
+    return json({ error: e.message }, 500);
   }
 }
 
