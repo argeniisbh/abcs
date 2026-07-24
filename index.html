@@ -508,7 +508,6 @@ tr.rc-ns{background:#1a0505 !important;}
   <div class="resumen-ia-chat"><input type="text" id="resumenIA-checkin-input" placeholder="Haz una pregunta…"/><button onclick="enviarPreguntaResumen('checkin')">Enviar</button></div>
 </div>
 </div>
-</div>
 
 
 <!-- CHECKOUT -->
@@ -559,6 +558,12 @@ tr.rc-ns{background:#1a0505 !important;}
 </div>
 </div>
 </div>
+<div class="resumen-ia-container" id="resumenIA-checkout">
+  <div class="resumen-ia-header">📊 Resumen IA <span style="font-size:11px;color:var(--tx2);margin-left:auto;">Click para expandir</span></div>
+  <div id="resumenIA-checkout-contenido" class="resumen-ia-texto"><div class="resumen-ia-cargando">Analizando datos…</div></div>
+  <div class="resumen-ia-chat"><input type="text" id="resumenIA-checkout-input" placeholder="Haz una pregunta…"/><button onclick="enviarPreguntaResumen('checkout')">Enviar</button></div>
+</div>
+</div>
 
 <!-- HISTORIAL -->
 <div id="sec-history" class="section">
@@ -575,11 +580,6 @@ tr.rc-ns{background:#1a0505 !important;}
 <div id="histDayStripWrap" style="display:none"><div class="day-strip" id="histDayStrip"></div></div>
 <div id="histHdr" style="margin-bottom:10px;display:none"><div style="font-size:14px;font-weight:600" id="histHdrTxt"></div></div>
 <div id="histList"></div>
-<div class="resumen-ia-container" id="resumenIA-checkout">
-  <div class="resumen-ia-header">📊 Resumen IA <span style="font-size:11px;color:var(--tx2);margin-left:auto;">Click para expandir</span></div>
-  <div id="resumenIA-checkout-contenido" class="resumen-ia-texto"><div class="resumen-ia-cargando">Analizando datos…</div></div>
-  <div class="resumen-ia-chat"><input type="text" id="resumenIA-checkout-input" placeholder="Haz una pregunta…"/><button onclick="enviarPreguntaResumen('checkout')">Enviar</button></div>
-</div>
 <div class="resumen-ia-container" id="resumenIA-historial">
   <div class="resumen-ia-header">📊 Resumen IA <span style="font-size:11px;color:var(--tx2);margin-left:auto;">Click para expandir</span></div>
   <div id="resumenIA-historial-contenido" class="resumen-ia-texto"><div class="resumen-ia-cargando">Analizando datos…</div></div>
