@@ -1858,6 +1858,18 @@ const tb=document.getElementById('ciBody');
 if(!fil.length){
 tb.innerHTML=`<tr><td colspan="10"><div class="empty"><div class="ei">📋</div><h3>${all.length?'Sin resultados':'Sin llegadas cargadas'}</h3><p>${all.length?'Cambia los filtros':'Carga el Excel o añade una llegada'}</p></div></td></tr>`;
 return;
+
+  // Generar resumen de check-in
+  const ciAll=DB.get('ab_checkins',[]);
+  const ciData={
+    total:ciAll.length,
+    completados:ciAll.filter(c=>c.completado).length,
+    abiertos:ciAll.filter(c=>!c.completado&&!c.noshow).length,
+    noshow:ciAll.filter(c=>c.noshow).length,
+    llavesEntregadas:ciAll.filter(c=>c.llavesEntregadas).length,
+    agentes:[...new Set(ciAll.map(c=>c.agente))].filter(Boolean)
+  };
+  generarResumenSeccion('checkin',ciData);
 }
 tb.innerHTML=fil.map(c=>{
 // Use tipoNorm (simple ASCII) if stored, else compute from tipoLlave
@@ -2134,6 +2146,17 @@ if(!auto){
     tabs.forEach(t=>{ if(t.textContent.trim().includes('Historial')){ goSec('history',t); } });
   }, 100);
 }
+  // Generar resumen de check-in
+  const ciAll=DB.get('ab_checkins',[]);
+  const ciData={
+    total:ciAll.length,
+    completados:ciAll.filter(c=>c.completado).length,
+    abiertos:ciAll.filter(c=>!c.completado&&!c.noshow).length,
+    noshow:ciAll.filter(c=>c.noshow).length,
+    llavesEntregadas:ciAll.filter(c=>c.llavesEntregadas).length,
+    agentes:[...new Set(ciAll.map(c=>c.agente))].filter(Boolean)
+  };
+  generarResumenSeccion('checkin',ciData);
 }
 
 // HISTORY
@@ -2158,6 +2181,16 @@ document.getElementById('histMGrid').innerHTML=MONTHS.map((m,i)=>{
   return`<button class="mbtn ${histMonth===i&&histYear===yr?'active':''}" onclick="selHistMon(${i},this)">${m}<span class="mbs">${cnt?cnt+(pen?` ⚠️`:' ✓'):'—'}</span></button>`;
 }).join('');
 renderHistDayStrip();renderHistList();
+
+  // Generar resumen de historial
+  const histAll=DB.get('ab_history',[]);
+  const histActivity=DB.get('ab_activity',[]);
+  const histData={
+    total:histAll.length,
+    ultimasAcciones:histActivity.sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,3).map(a=>a.action||'acción').filter(a=>a.length>0),
+    usuarios:[...new Set(histActivity.map(a=>a.user))].filter(Boolean)
+  };
+  generarResumenSeccion('historial',histData);
 }
 function selHistMon(m,el){histMonth=m;histDay=null;document.querySelectorAll('#histMGrid .mbtn').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderHistDayStrip();renderHistList();}
 function renderHistDayStrip(){
@@ -2273,6 +2306,17 @@ ${isAdmin?`<button class="btn btn-r btn-sm" onclick="deleteKey('${k.id}')" title
 <div class="khist" id="kh-${k.id}">
 ${k.historial.length?`<div style="font-size:10px;color:var(--tx3);margin-bottom:6px;text-transform:uppercase">Historial</div>`+k.historial.slice().reverse().map(h=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bd);font-size:12px;flex-wrap:wrap"><span style="color:${h.tipo==='entrega'?'var(--rd)':'var(--gn)'}">${h.tipo==='entrega'?'📤':'📥'} ${h.tipo==='entrega'?'Entregada':'Devuelta'}</span>${ach(h.agente)}${h.reserva?`<span style="color:var(--tx3)">#${h.reserva}</span>`:''}<span style="color:var(--tx3)">${h.cantidad} llave${h.cantidad>1?'s':''}</span>${h.notas?`<span style="color:var(--tx3)">"${h.notas}"</span>`:''}<span style="margin-left:auto;color:var(--tx3)">${h.hora}</span></div>`).join(''):`<div style="color:var(--tx3);font-size:12px">Sin movimientos registrados</div>`}
 </div>`}).join(''):'<div class="empty"><div class="ei">🗝️</div><h3>Sin resultados</h3><p>No hay llaves que coincidan con tu búsqueda</p></div>';
+
+  // Generar resumen de llaves
+  const keysAll=DB.get('ab_keys',[]);
+  const keysData={
+    total:keysAll.length,
+    entregadas:keysAll.filter(k=>k.estado==='entregada').length,
+    almacen:keysAll.filter(k=>k.estado==='almacen'||!k.estado).length,
+    pendientes:keysAll.filter(k=>k.estado==='pendiente').length,
+    apartamentosPendientes:[...new Set(keysAll.filter(k=>k.estado==='pendiente').map(k=>k.apartamento))].length
+  };
+  generarResumenSeccion('llaves',keysData);
 }
 function togKH(id){const el=document.getElementById('kh-'+id);el.style.display=el.style.display==='block'?'none':'block';}
 function openKA(kid,type){
@@ -2598,6 +2642,17 @@ ${links?`<div class="noise-links">${links}</div>`:''}
 </div>
 </div>`;
   }).join('');
+
+  // Generar resumen de ruido
+  const noiseAll=DB.get('ab_noise',[]);
+  const noiseData={
+    total:noiseAll.length,
+    criticas:noiseAll.filter(n=>n.level===3).length,
+    moderadas:noiseAll.filter(n=>n.level===2).length,
+    leves:noiseAll.filter(n=>n.level===1).length,
+    pendientes:noiseAll.filter(n=>n.estado!=='resuelto'&&n.estado!=='closed').length
+  };
+  generarResumenSeccion('ruido',noiseData);
 }
 const noiseOpenCards=new Set();
 function toggleNoiseCard(id){
@@ -2636,6 +2691,16 @@ const pen=rp.filter(r=>{const d=new Date(r.fecha||r.desde||'');return d.getFullY
 return`<button class="mbtn ${repMonth===i&&repYear===yr?'active':''}" onclick="selMon(${i},this)">${m}<span class="mbs">${cnt?cnt+(pen?` ⚠️`:' ✓'):'—'}</span></button>`;
 }).join('');
 renderDayStrip();renderRepList();
+
+  // Generar resumen de reportes
+  const repAll=DB.get('ab_reports',[]);
+  const repData={
+    total:repAll.length,
+    pendientes:repAll.filter(r=>r.estado==='pendiente'||r.estado==='open').length,
+    resueltos:repAll.filter(r=>r.estado==='resuelto'||r.estado==='closed').length,
+    tiposPendientes:[...new Set(repAll.filter(r=>r.estado==='pendiente'||r.estado==='open').map(r=>r.tipo))].filter(Boolean)
+  };
+  generarResumenSeccion('reportes',repData);
 }
 function selMon(m,el){repMonth=m;repDay=null;document.querySelectorAll('.mbtn').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderDayStrip();renderRepList();}
 function renderDayStrip(){
@@ -2966,6 +3031,17 @@ function renderCO(){
       +'<td><button class="sbtn '+(co.completado?'sd':'sp')+'" onclick="togCO('+co.id+')">'+(co.completado?'✓ Checkout OK':'Pendiente')+'</button></td>'
       +'</tr>';
   }).join('');
+
+  // Generar resumen de checkout
+  const coAll=DB.get('ab_checkouts',[]);
+  const coData={
+    total:coAll.length,
+    completados:coAll.filter(c=>c.completado).length,
+    pendientes:coAll.filter(c=>!c.completado).length,
+    llavesRecibidas:coAll.filter(c=>c.llavesRecibidas).length,
+    llavesFaltantes:coAll.filter(c=>c.numLlaves&&c.numLlaves>0&&!c.completado).length
+  };
+  generarResumenSeccion('checkout',coData);
 }
 
 function togCO(id){
