@@ -2192,6 +2192,7 @@ renderHistDayStrip();renderHistList();
   };
   generarResumenSeccion('historial',histData);
 }
+
 function selHistMon(m,el){histMonth=m;histDay=null;document.querySelectorAll('#histMGrid .mbtn').forEach(b=>b.classList.remove('active'));el.classList.add('active');renderHistDayStrip();renderHistList();}
 function renderHistDayStrip(){
 const hist=DB.get('ab_history',[]);
